@@ -1,1 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Fishing Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; background-color: #87CEEB; }
+        #pond { display: grid; grid-template-columns: repeat(5, 60px); gap: 5px; justify-content: center; margin-top: 20px; }
+        .cell { width: 60px; height: 60px; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; background-color: #1E90FF; border-radius: 10px; }
+        .scoreboard { font-size: 20px; margin-top: 10px; }
+        .btn { font-size: 30px; cursor: pointer; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1 class="text-3xl font-bold">🎣 Emoji Fishing Game</h1>
+    <p>Click the fishing rod 🎣 to catch a fish!</p>
+    <div class="scoreboard">Score: <span id="score">0</span></div>
+    <div id="pond"></div>
+    <button class="btn" onclick="castRod()">🎣 Cast Fishing Rod</button>
+    
+    <script>
+        const pondSize = 5;
+        const fishEmojis = ['🐟', '🐠', '🐡', '🦈', '🐙', '🦀', '🦞', '🦐', '🐬', '🎣'];
+        let score = 0;
+        
+        function generatePond() {
+            const pond = document.getElementById("pond");
+            pond.innerHTML = "";
+            for (let i = 0; i < pondSize * pondSize; i++) {
+                let cell = document.createElement("div");
+                cell.classList.add("cell");
+                cell.innerHTML = "💦";
+                pond.appendChild(cell);
+            }
+        }
+        
+        function castRod() {
+            let cells = document.querySelectorAll(".cell");
+            let randomIndex = Math.floor(Math.random() * cells.length);
+            let caughtFish = fishEmojis[Math.floor(Math.random() * fishEmojis.length)];
+            cells[randomIndex].innerHTML = caughtFish;
+            score++;
+            document.getElementById("score").innerText = score;
+            setTimeout(generatePond, 1000);
+        }
+        
+        generatePond();
+    </script>
+</body>
+</html>
 
