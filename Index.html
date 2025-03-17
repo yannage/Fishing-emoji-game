@@ -41,11 +41,139 @@
         .upgrade-option:hover {
             background-color: #e9ecef;
         }
-        #fishing-grid-container { display: none; position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 10px; z-index: 10; }
-        #fishing-grid { display: grid; grid-template-columns: repeat(3, 50px); grid-gap: 5px; justify-content: center; }
-        .grid-cell { width: 50px; height: 50px; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; background-color: #f0f0f0; border-radius: 5px; }
-        #time-bar { width: 100%; height: 8px; background-color: #ccc; border-radius: 4px; margin-top: 10px; overflow: hidden; }
-        #time-fill { height: 100%; background-color: #4CAF50; width: 100%; transition: width linear; }
+                #upgrade-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 20;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 90%;
+            width: 400px;
+            text-align: left;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-title span {
+            margin-left: 10px;
+            font-size: 2rem;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .benefits-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+        
+        .benefits-list li {
+            margin: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .benefits-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .modal-button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .confirm-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .confirm-button:hover {
+            background-color: #3e8e41;
+        }
+        
+        .cancel-button {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .cancel-button:hover {
+            background-color: #d32f2f;
+        }
+        
+        .fish-preview {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 1.5rem;
+        }
+        
+        .price-tag {
+            font-weight: bold;
+            color: #f44336;
+        }
+        
+        /* Toast notification for feedback */
+        #toast {
+            visibility: hidden;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 250px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            z-index: 30;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        #toast.show {
+            visibility: visible;
+            animation: toast-in-out 2.5s;
+        }
+        
+        @keyframes toast-in-out {
+            0% { top: -50px; opacity: 0; }
+            20% { top: 20px; opacity: 1; }
+            80% { top: 20px; opacity: 1; }
+            100% { top: -50px; opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -397,21 +525,4 @@
                 sailboatButton.disabled = money < 500;
                 sailboatButton.style.opacity = money < 500 ? "0.5" : "1";
                 yachtButton.disabled = true;
-                yachtButton.style.opacity = "0.5";
-            } else if (boat === "⛵") {
-                sailboatButton.disabled = true;
-                sailboatButton.style.opacity = "0.5";
-                yachtButton.disabled = money < 2000;
-                yachtButton.style.opacity = money < 2000 ? "0.5" : "1";
-            } else {
-                sailboatButton.disabled = true;
-                sailboatButton.style.opacity = "0.5";
-                yachtButton.disabled = true;
-                yachtButton.style.opacity = "0.5";
-            }
-        }
-
-        spawnFish();
-    </script>
-</body>
-</html> 
+                yachtButton.style.o
