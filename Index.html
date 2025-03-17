@@ -59,6 +59,20 @@
         document.getElementById("money").innerText = money;
         let caughtFish = [];
 
+        function spawnFish() {
+            let water = document.getElementById("water");
+            water.innerHTML = '<div id="boat">' + boat + '</div>';
+            for (let i = 0; i < 5; i++) {
+                let fish = document.createElement("div");
+                fish.classList.add("fish");
+                fish.innerText = fishTypes[boat][Math.floor(Math.random() * fishTypes[boat].length)];
+                fish.style.top = Math.random() * 40 + 10 + "%";
+                fish.style.left = Math.random() * 90 + "%";
+                fish.setAttribute("onclick", "startFishingGame(this)");
+                water.appendChild(fish);
+            }
+        }
+
         function startFishingGame(fish) {
             document.getElementById("fishing-grid-container").style.display = "block";
             let grid = document.getElementById("fishing-grid");
@@ -74,8 +88,8 @@
                         setTimeout(() => {
                             cell.innerText = fish.innerText;
                             cell.setAttribute("onclick", "catchFish(this, true, fish)");
-                        }, Math.random() * 975 + 25);
-                    }, Math.random() * 975 + 25);
+                        }, 500);
+                    }, 500);
                 } else {
                     cell.setAttribute("onclick", "catchFish(this, false, fish)");
                 }
@@ -94,6 +108,8 @@
             }
             fish.remove();
         }
+
+        spawnFish();
     </script>
 </body>
 </html>
