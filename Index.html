@@ -9,14 +9,15 @@
         body { text-align: center; font-family: Arial, sans-serif; background-color: #87CEEB; overflow: hidden; }
         #game-container { position: relative; width: 100vw; height: 80vh; }
         #sky { background-color: #87CEEB; height: 50%; position: relative; }
-        #clock { position: absolute; top: 10px; right: 10px; font-size: 40px; }
+        #day-bar-container { width: 80%; height: 20px; background-color: black; margin: 10px auto; border-radius: 5px; }
+        #day-bar { width: 100%; height: 100%; background-color: yellow; transition: width 2s linear; }
         #water { background-color: #1E90FF; height: 50%; position: relative; }
         #boat { position: absolute; bottom: 50%; left: 50%; transform: translate(-50%, 50%); font-size: 50px; }
         .fish { position: absolute; font-size: 40px; cursor: pointer; animation: swim 5s infinite linear alternate; }
         @keyframes swim { from { transform: translateX(-50px); } to { transform: translateX(50px); } }
         #fish-tank { margin-top: 20px; font-size: 20px; }
         #market-screen { display: none; }
-        .meter-container { display: none; width: 200px; height: 20px; background-color: red; margin: auto; position: relative; }
+        .meter-container { display: none; width: 200px; height: 20px; background-color: red; margin: auto; position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); }
         .meter-bar { width: 30px; height: 100%; background-color: green; position: absolute; left: 85px; }
         .rod-icon { position: absolute; font-size: 30px; transition: left 0.2s linear; }
         .button { display: block; padding: 10px; background: white; border: 2px solid black; margin: 10px auto; cursor: pointer; width: 150px; }
@@ -25,9 +26,11 @@
 </head>
 <body>
     <h1 class="text-3xl font-bold">🎣 Emoji Fishing Game</h1>
+    <div id="day-bar-container">
+        <div id="day-bar"></div>
+    </div>
     <div id="game-container">
         <div id="sky">
-            <div id="clock">🕕</div>
             <div class="clouds">☁️ ☁️ ☁️</div>
         </div>
         <div id="water">
@@ -57,16 +60,19 @@
         document.getElementById("money").innerText = money;
         let caughtFish = [];
         let fishing = false;
-        let hour = 6;
-        function updateClock() {
-            document.getElementById("clock").innerText = `🕑`.replace('2', hour);
-            hour++;
-            if (hour > 18) {
-                alert("Day Over");
-                goToMarket();
-            } else {
-                setTimeout(updateClock, 10000);
-            }
+        function updateDayBar() {
+            let bar = document.getElementById("day-bar");
+            let interval = setInterval(() => {
+                let width = parseInt(bar.style.width) || 100;
+                if (width > 0) {
+                    width -= 1;
+                    bar.style.width = width + "%";
+                } else {
+                    clearInterval(interval);
+                    alert("Day Over");
+                    goToMarket();
+                }
+            }, 1200);
         }
         function spawnFish() {
             document.getElementById("water").innerHTML = '<div id="boat">' + boat + '</div>';
@@ -112,7 +118,7 @@
                 fish.remove();
             }, 2000);
         }
-        updateClock();
+        updateDayBar();
         spawnFish();
     </script>
 </body>
