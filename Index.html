@@ -50,10 +50,11 @@
     <script>
         let money = parseInt(localStorage.getItem("money")) || 0;
         let boat = localStorage.getItem("boat") || "🚤";
-        let fishTypes = {
-            "🚤": ["🐟", "🐠"],
-            "⛵": ["🐟", "🐠", "🐡", "🦐"],
-            "🚢": ["🐟", "🐠", "🐡", "🦐", "🦀", "🦞", "🦈"]
+        // Fish probabilities based on boat type
+        let fishProbabilities = {
+            "🚤": { "🐟": 60, "🐠": 35, "🐡": 3, "🦐": 1, "🦀": 0.5, "🦞": 0.3, "🦈": 0.2 },
+            "⛵": { "🐟": 40, "🐠": 30, "🐡": 15, "🦐": 8, "🦀": 4, "🦞": 2, "🦈": 1 },
+            "🚢": { "🐟": 20, "🐠": 20, "🐡": 20, "🦐": 15, "🦀": 10, "🦞": 5, "🦈": 10 }
         };
         let fishValues = { "🐟": 5, "🐠": 10, "🐡": 20, "🦐": 50, "🦀": 100, "🦞": 200, "🦈": 500 };
         document.getElementById("boat").innerText = boat;
@@ -81,6 +82,13 @@
                     if (left <= 0) fish.direction = 1;
                     if (left >= 90) fish.direction = -1;
                     fish.style.left = left + fish.direction * 0.5 + "%";
+                    
+                    // Flip fish based on direction
+                    if (fish.direction === 1) {
+                        fish.style.transform = "scaleX(1)"; // Moving right, normal orientation
+                    } else {
+                        fish.style.transform = "scaleX(-1)"; // Moving left, flipped orientation
+                    }
                 }, 50);
 
                 fish.onclick = function () {
@@ -92,8 +100,30 @@
         }
 
         function weightedRandomFish() {
-            let availableFish = fishTypes[boat];
-            return availableFish[Math.floor(Math.random() * availableFish.length)];
+            const probabilities = fishProbabilities[boat];
+            const fishTypes = Object.keys(probabilities);
+            const probabilityValues = Object.values(probabilities);
+            
+            // Calculate cumulative probabilities
+            const cumulativeProbabilities = [];
+            let sum = 0;
+            for (let i = 0; i < probabilityValues.length; i++) {
+                sum += probabilityValues[i];
+                cumulativeProbabilities.push(sum);
+            }
+            
+            // Generate random number between 0 and sum
+            const random = Math.random() * sum;
+            
+            // Find the fish type corresponding to the random value
+            for (let i = 0; i < cumulativeProbabilities.length; i++) {
+                if (random < cumulativeProbabilities[i]) {
+                    return fishTypes[i];
+                }
+            }
+            
+            // Fallback to common fish
+            return "🐟";
         }
 
         function startFishingGame(fish) {
@@ -132,6 +162,20 @@
             fishingTimeout = setTimeout(() => {
                 catchFish(false, fish);
             }, 3000);
+            
+            // Add visual countdown to show time remaining
+            const statusElement = document.getElementById("fishing-status");
+            let timeLeft = 3;
+            statusElement.innerText = `Find the fish! ${timeLeft}s remaining`;
+            
+            const countdownInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    statusElement.innerText = `Find the fish! ${timeLeft}s remaining`;
+                } else {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
         }
 
         function catchFish(success, fish) {
@@ -141,6 +185,16 @@
             if (success) {
                 caughtFish.push(fish.innerText);
                 document.getElementById("caught-fish").innerText = caughtFish.join(" ");
+                // Play a subtle catch sound
+                try {
+                    const sound = document.getElementById("market-sound");
+                    sound.volume = 0.2;
+                    sound.play();
+                    setTimeout(() => {
+                        sound.pause();
+                        sound.currentTime = 0;
+                    }, 500); // Even shorter for the catch sound
+                } catch (e) {}
             }
             
             fish.remove();
@@ -156,7 +210,14 @@
             document.getElementById("market-screen").style.display = "block";
             document.getElementById("market-fish").innerText = "Fish to Sell: " + caughtFish.join(" ");
             try {
-                document.getElementById("market-sound").play();
+                const sound = document.getElementById("market-sound");
+                sound.volume = 0.3; // Lower volume
+                sound.play();
+                // Stop sound after 1 second
+                setTimeout(() => {
+                    sound.pause();
+                    sound.currentTime = 0;
+                }, 1000);
             } catch (e) {
                 console.log("Audio couldn't play automatically: ", e);
             }
