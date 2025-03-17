@@ -7,15 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { text-align: center; font-family: Arial, sans-serif; background-color: #87CEEB; overflow: hidden; }
-        #game-container { position: relative; width: 100vw; height: 80vh; }
-        #sky { background-color: #87CEEB; height: 50%; position: relative; }
+        #game-container { position: relative; width: 100vw; height: 75vh; }
+        #sky { background-color: #87CEEB; height: 45%; position: relative; }
         #day-bar-container { width: 80%; height: 20px; background-color: black; margin: 10px auto; border-radius: 5px; }
         #day-bar { width: 100%; height: 100%; background-color: yellow; transition: width 2s linear; }
-        #water { background-color: #1E90FF; height: 50%; position: relative; }
-        #boat { position: absolute; bottom: 50%; left: 50%; transform: translate(-50%, 50%); font-size: 50px; }
+        #water { background-color: #1E90FF; height: 55%; position: relative; }
+        #boat { position: absolute; top: 5%; left: 5%; font-size: 50px; }
         .fish { position: absolute; font-size: 40px; cursor: pointer; animation: swim 5s infinite linear alternate; }
         @keyframes swim { from { transform: translateX(-50px); } to { transform: translateX(50px); } }
-        #fish-tank { margin-top: 20px; font-size: 20px; }
+        #fish-tank { margin-top: 10px; font-size: 20px; position: relative; z-index: 2; }
         #market-screen { display: none; }
         .button { display: block; padding: 10px; background: white; border: 2px solid black; margin: 10px auto; cursor: pointer; width: 150px; }
         .clouds { position: absolute; top: 10%; left: 10%; font-size: 40px; }
@@ -60,53 +60,7 @@
         document.getElementById("boat").innerText = boat;
         document.getElementById("money").innerText = money;
         let caughtFish = [];
-        function spawnFish() {
-            document.getElementById("water").innerHTML = '<div id="boat">' + boat + '</div>';
-            let water = document.getElementById("water");
-            for (let i = 0; i < 5; i++) {
-                let fish = document.createElement("div");
-                fish.classList.add("fish");
-                fish.innerText = fishTypes[boat][Math.floor(Math.random() * fishTypes[boat].length)];
-                fish.style.top = Math.random() * 40 + 10 + "%";
-                fish.style.left = Math.random() * 90 + "%";
-                fish.onclick = () => startFishingGame(fish);
-                water.appendChild(fish);
-            }
-        }
-        function startFishingGame(fish) {
-            document.getElementById("fishing-grid-container").style.display = "block";
-            let grid = document.getElementById("fishing-grid");
-            grid.innerHTML = "";
-            let fishPosition = Math.floor(Math.random() * 9);
-            for (let i = 0; i < 9; i++) {
-                let cell = document.createElement("div");
-                cell.classList.add("grid-cell");
-                cell.innerText = "🌊";
-                if (i === fishPosition) {
-                    setTimeout(() => {
-                        cell.classList.add("shake");
-                        setTimeout(() => {
-                            cell.innerText = fish.innerText;
-                            cell.onclick = () => catchFish(cell, true, fish);
-                        }, Math.random() * 975 + 25);
-                    }, Math.random() * 975 + 25);
-                } else {
-                    cell.onclick = () => catchFish(cell, false, fish);
-                }
-                grid.appendChild(cell);
-            }
-        }
-        function catchFish(cell, success, fish) {
-            document.getElementById("fishing-grid-container").style.display = "none";
-            if (success) {
-                caughtFish.push(fish.innerText);
-                document.getElementById("caught-fish").innerText = caughtFish.join(" ");
-                document.getElementById("fishing-status").innerText = "Fish Caught! ✅";
-            } else {
-                document.getElementById("fishing-status").innerText = "Fish Got Away! 🛑";
-            }
-            fish.remove();
-        }
+
         function updateDayBar() {
             let bar = document.getElementById("day-bar");
             let interval = setInterval(() => {
@@ -121,6 +75,21 @@
                 }
             }, 1200);
         }
+
+        function spawnFish() {
+            document.getElementById("water").innerHTML = '<div id="boat">' + boat + '</div>';
+            let water = document.getElementById("water");
+            for (let i = 0; i < 5; i++) {
+                let fish = document.createElement("div");
+                fish.classList.add("fish");
+                fish.innerText = fishTypes[boat][Math.floor(Math.random() * fishTypes[boat].length)];
+                fish.style.top = Math.random() * 40 + 10 + "%";
+                fish.style.left = Math.random() * 90 + "%";
+                fish.onclick = () => startFishingGame(fish);
+                water.appendChild(fish);
+            }
+        }
+
         updateDayBar();
         spawnFish();
     </script>
