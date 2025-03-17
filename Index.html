@@ -12,6 +12,7 @@
         .cloud { font-size: 40px; }
         #water { background-color: #1E90FF; height: 55%; position: relative; display: flex; align-items: center; }
         #boat { position: absolute; top: 0; left: 5%; font-size: 50px; }
+        #fishing-rod { display: none; position: absolute; font-size: 40px; z-index: 5; transform-origin: top left; transition: transform 0.5s ease-out; }
         .fish { position: absolute; font-size: 40px; cursor: pointer; transition: transform 0.2s linear; }
         #fish-tank { margin-top: 10px; font-size: 20px; position: relative; z-index: 2; }
         #market-screen { display: none; }
@@ -32,6 +33,7 @@
         </div>
         <div id="water">
             <div id="boat">🚤</div>
+            <div id="fishing-rod">🎣</div>
         </div>
     </div>
     <div id="fishing-grid-container">
@@ -50,11 +52,10 @@
     <script>
         let money = parseInt(localStorage.getItem("money")) || 0;
         let boat = localStorage.getItem("boat") || "🚤";
-        // Fish probabilities based on boat type
-        let fishProbabilities = {
-            "🚤": { "🐟": 60, "🐠": 35, "🐡": 3, "🦐": 1, "🦀": 0.5, "🦞": 0.3, "🦈": 0.2 },
-            "⛵": { "🐟": 40, "🐠": 30, "🐡": 15, "🦐": 8, "🦀": 4, "🦞": 2, "🦈": 1 },
-            "🚢": { "🐟": 20, "🐠": 20, "🐡": 20, "🦐": 15, "🦀": 10, "🦞": 5, "🦈": 10 }
+        let fishTypes = {
+            "🚤": ["🐟", "🐠"],
+            "⛵": ["🐟", "🐠", "🐡", "🦐"],
+            "🚢": ["🐟", "🐠", "🐡", "🦐", "🦀", "🦞", "🦈"]
         };
         let fishValues = { "🐟": 5, "🐠": 10, "🐡": 20, "🦐": 50, "🦀": 100, "🦞": 200, "🦈": 500 };
         document.getElementById("boat").innerText = boat;
@@ -82,13 +83,6 @@
                     if (left <= 0) fish.direction = 1;
                     if (left >= 90) fish.direction = -1;
                     fish.style.left = left + fish.direction * 0.5 + "%";
-                    
-                    // Flip fish based on direction
-                    if (fish.direction === 1) {
-                        fish.style.transform = "scaleX(1)"; // Moving right, normal orientation
-                    } else {
-                        fish.style.transform = "scaleX(-1)"; // Moving left, flipped orientation
-                    }
                 }, 50);
 
                 fish.onclick = function () {
@@ -100,30 +94,8 @@
         }
 
         function weightedRandomFish() {
-            const probabilities = fishProbabilities[boat];
-            const fishTypes = Object.keys(probabilities);
-            const probabilityValues = Object.values(probabilities);
-            
-            // Calculate cumulative probabilities
-            const cumulativeProbabilities = [];
-            let sum = 0;
-            for (let i = 0; i < probabilityValues.length; i++) {
-                sum += probabilityValues[i];
-                cumulativeProbabilities.push(sum);
-            }
-            
-            // Generate random number between 0 and sum
-            const random = Math.random() * sum;
-            
-            // Find the fish type corresponding to the random value
-            for (let i = 0; i < cumulativeProbabilities.length; i++) {
-                if (random < cumulativeProbabilities[i]) {
-                    return fishTypes[i];
-                }
-            }
-            
-            // Fallback to common fish
-            return "🐟";
+            let availableFish = fishTypes[boat];
+            return availableFish[Math.floor(Math.random() * availableFish.length)];
         }
 
         function startFishingGame(fish) {
@@ -136,6 +108,24 @@
             // Create a 3x3 grid
             const fishPosition = Math.floor(Math.random() * 9);
             
+            // Show fishing rod animation
+            const fishingRod = document.getElementById("fishing-rod");
+            const boat = document.getElementById("boat");
+            const boatRect = boat.getBoundingClientRect();
+            const fishRect = fish.getBoundingClientRect();
+            
+            fishingRod.style.display = "block";
+            fishingRod.style.left = (parseFloat(boat.style.left) || 5) + 3 + "%";
+            fishingRod.style.top = "5%";
+            
+            // Calculate the angle between boat and fish
+            const dx = fishRect.left - boatRect.left;
+            const dy = fishRect.top - boatRect.top;
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            // Animate fishing rod to point at the fish
+            fishingRod.style.transform = `rotate(${angle}deg)`;
+            
             for (let i = 0; i < 9; i++) {
                 const cell = document.createElement("div");
                 cell.classList.add("grid-cell");
@@ -145,7 +135,13 @@
                     if (parseInt(this.dataset.index) === fishPosition) {
                         this.innerText = fish.innerText;
                         clearTimeout(fishingTimeout);
-                        setTimeout(() => catchFish(true, fish), 500);
+                        
+                        // Show catching animation
+                        fishingRod.style.transform = `rotate(${angle}deg) scale(1.2)`;
+                        setTimeout(() => {
+                            fishingRod.style.transform = `rotate(${angle}deg) scale(1.0)`;
+                            setTimeout(() => catchFish(true, fish), 300);
+                        }, 200);
                     } else {
                         this.innerText = "💨";
                         this.style.pointerEvents = "none";
