@@ -16,7 +16,31 @@
         .fish { position: absolute; font-size: 40px; cursor: pointer; transition: transform 0.2s linear; }
         #fish-tank { margin-top: 10px; font-size: 20px; position: relative; z-index: 2; }
         #market-screen { display: none; }
-        .button { display: block; padding: 10px; background: white; border: 2px solid black; margin: 10px auto; cursor: pointer; width: 150px; }
+        .button { 
+            display: block; 
+            padding: 10px; 
+            background: white; 
+            border: 2px solid black; 
+            margin: 10px auto; 
+            cursor: pointer; 
+            width: 150px;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+        .button:hover {
+            background-color: #f0f0f0;
+            transform: scale(1.05);
+        }
+        .button:disabled {
+            cursor: not-allowed;
+        }
+        .upgrade-option {
+            background-color: #f8f9fa;
+            transition: all 0.2s;
+        }
+        .upgrade-option:hover {
+            background-color: #e9ecef;
+        }
         #fishing-grid-container { display: none; position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 10px; z-index: 10; }
         #fishing-grid { display: grid; grid-template-columns: repeat(3, 50px); grid-gap: 5px; justify-content: center; }
         .grid-cell { width: 50px; height: 50px; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; background-color: #f0f0f0; border-radius: 5px; }
@@ -47,10 +71,23 @@
     </div>
     <div id="fish-tank">Fish Tank: <span id="caught-fish"></span></div>
     <div id="market-screen">
-        <h2>Market</h2>
-        <div id="market-fish"></div>
-        <p>Money: $<span id="money">0</span></p>
+        <h2 class="text-2xl font-bold mb-4">Market</h2>
+        <div id="market-fish" class="mb-3"></div>
+        <p class="text-xl mb-3">Money: $<span id="money">0</span></p>
         <button class="button" onclick="sellFish()">Sell Fish</button>
+        
+        <div id="upgrades" class="mt-6 mb-4">
+            <h3 class="text-xl font-bold mb-2">Boat Upgrades</h3>
+            <div class="upgrade-option flex justify-between items-center border rounded p-3 mb-2">
+                <span>Fishing Sailboat (⛵): $500</span>
+                <button class="button" style="margin: 0; width: auto;" onclick="upgradeBoat('sailboat')">Buy</button>
+            </div>
+            <div class="upgrade-option flex justify-between items-center border rounded p-3">
+                <span>Luxury Yacht (🚢): $2000</span>
+                <button class="button" style="margin: 0; width: auto;" onclick="upgradeBoat('yacht')">Buy</button>
+            </div>
+        </div>
+        
         <button class="button" onclick="startNewDay()">Start New Day</button>
     </div>
     <audio id="market-sound" src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d1718d0c4f.mp3?filename=soft-notification-sound-98485.mp3"></audio>
@@ -283,6 +320,10 @@
             document.getElementById("game-container").style.display = "none";
             document.getElementById("market-screen").style.display = "block";
             document.getElementById("market-fish").innerText = "Fish to Sell: " + caughtFish.join(" ");
+            
+            // Update upgrade buttons when market opens
+            updateUpgradeButtons();
+            
             try {
                 const sound = document.getElementById("market-sound");
                 sound.volume = 0.3; // Lower volume
@@ -312,23 +353,62 @@
             spawnFish();
         }
 
-        // Check if there's enough money to upgrade the boat
-        function upgradeBoat() {
-            if (boat === "🚤" && money >= 500) {
+        // Function to upgrade the boat
+        function upgradeBoat(type) {
+            let success = false;
+            
+            if (type === 'sailboat' && boat === "🚤" && money >= 500) {
                 boat = "⛵";
                 money -= 500;
-            } else if (boat === "⛵" && money >= 2000) {
+                success = true;
+            } else if (type === 'yacht' && boat === "⛵" && money >= 2000) {
                 boat = "🚢";
                 money -= 2000;
-            } else {
-                return false;
+                success = true;
             }
             
-            localStorage.setItem("boat", boat);
-            localStorage.setItem("money", money);
-            document.getElementById("boat").innerText = boat;
-            document.getElementById("money").innerText = money;
-            return true;
+            if (success) {
+                localStorage.setItem("boat", boat);
+                localStorage.setItem("money", money);
+                document.getElementById("boat").innerText = boat;
+                document.getElementById("money").innerText = money;
+                updateUpgradeButtons();
+                
+                // Visual feedback of successful purchase
+                alert("Boat upgraded successfully!");
+            } else {
+                // Provide feedback if can't afford
+                if (money < 500 && type === 'sailboat') {
+                    alert("You need $500 to buy the Fishing Sailboat!");
+                } else if (money < 2000 && type === 'yacht') {
+                    alert("You need $2000 to buy the Luxury Yacht!");
+                } else if ((boat === "⛵" && type === 'sailboat') || (boat === "🚢")) {
+                    alert("You already have this boat or a better one!");
+                }
+            }
+        }
+        
+        // Update the upgrade buttons based on current state
+        function updateUpgradeButtons() {
+            const sailboatButton = document.querySelector('#upgrades button:nth-child(1)');
+            const yachtButton = document.querySelector('#upgrades button:nth-child(2)');
+            
+            if (boat === "🚤") {
+                sailboatButton.disabled = money < 500;
+                sailboatButton.style.opacity = money < 500 ? "0.5" : "1";
+                yachtButton.disabled = true;
+                yachtButton.style.opacity = "0.5";
+            } else if (boat === "⛵") {
+                sailboatButton.disabled = true;
+                sailboatButton.style.opacity = "0.5";
+                yachtButton.disabled = money < 2000;
+                yachtButton.style.opacity = money < 2000 ? "0.5" : "1";
+            } else {
+                sailboatButton.disabled = true;
+                sailboatButton.style.opacity = "0.5";
+                yachtButton.disabled = true;
+                yachtButton.style.opacity = "0.5";
+            }
         }
 
         spawnFish();
