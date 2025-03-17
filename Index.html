@@ -22,8 +22,6 @@
         #fishing-grid-container { display: none; position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); }
         #fishing-grid { display: grid; grid-template-columns: repeat(3, 50px); grid-gap: 5px; justify-content: center; }
         .grid-cell { width: 50px; height: 50px; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .shake { animation: shake 0.2s infinite alternate; }
-        @keyframes shake { from { transform: translateX(-3px); } to { transform: translateX(3px); } }
     </style>
 </head>
 <body>
@@ -61,57 +59,41 @@
         document.getElementById("money").innerText = money;
         let caughtFish = [];
 
-        function updateDayBar() {
-            let bar = document.getElementById("day-bar");
-            let interval = setInterval(() => {
-                let width = parseInt(bar.style.width) || 100;
-                if (width > 0) {
-                    width -= 1;
-                    bar.style.width = width + "%";
+        function startFishingGame(fish) {
+            document.getElementById("fishing-grid-container").style.display = "block";
+            let grid = document.getElementById("fishing-grid");
+            grid.innerHTML = "";
+            let fishPosition = Math.floor(Math.random() * 9);
+            for (let i = 0; i < 9; i++) {
+                let cell = document.createElement("div");
+                cell.classList.add("grid-cell");
+                cell.innerText = "🌊";
+                if (i === fishPosition) {
+                    setTimeout(() => {
+                        cell.innerText = "💦";
+                        setTimeout(() => {
+                            cell.innerText = fish.innerText;
+                            cell.setAttribute("onclick", "catchFish(this, true, fish)");
+                        }, Math.random() * 975 + 25);
+                    }, Math.random() * 975 + 25);
                 } else {
-                    clearInterval(interval);
-                    alert("Day Over");
-                    goToMarket();
+                    cell.setAttribute("onclick", "catchFish(this, false, fish)");
                 }
-            }, 1200);
-        }
-
-        function spawnFish() {
-            let water = document.getElementById("water");
-            water.innerHTML = '<div id="boat">' + boat + '</div>';
-            for (let i = 0; i < 5; i++) {
-                let fish = document.createElement("div");
-                fish.classList.add("fish");
-                fish.innerText = fishTypes[boat][Math.floor(Math.random() * fishTypes[boat].length)];
-                fish.style.top = Math.random() * 40 + 10 + "%";
-                fish.style.left = Math.random() * 90 + "%";
-                fish.setAttribute("onclick", "startFishingGame(this)");
-                water.appendChild(fish);
+                grid.appendChild(cell);
             }
         }
 
-        function goToMarket() {
-            document.getElementById("market-screen").style.display = "block";
-        }
-
-        function buyBoat(cost, newBoat) {
-            if (money >= cost) {
-                money -= cost;
-                boat = newBoat;
-                localStorage.setItem("money", money);
-                localStorage.setItem("boat", boat);
-                document.getElementById("money").innerText = money;
-                document.getElementById("boat").innerText = boat;
+        function catchFish(cell, success, fish) {
+            document.getElementById("fishing-grid-container").style.display = "none";
+            if (success) {
+                caughtFish.push(fish.innerText);
+                document.getElementById("caught-fish").innerText = caughtFish.join(" ");
+                document.getElementById("fishing-status").innerText = "Fish Caught! ✅";
+            } else {
+                document.getElementById("fishing-status").innerText = "Fish Got Away! 🛑";
             }
+            fish.remove();
         }
-
-        function startNewDay() {
-            document.getElementById("market-screen").style.display = "none";
-            spawnFish();
-        }
-
-        updateDayBar();
-        spawnFish();
     </script>
 </body>
 </html>
