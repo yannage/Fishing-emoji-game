@@ -17,11 +17,13 @@
         @keyframes swim { from { transform: translateX(-50px); } to { transform: translateX(50px); } }
         #fish-tank { margin-top: 20px; font-size: 20px; }
         #market-screen { display: none; }
-        .meter-container { display: none; width: 200px; height: 20px; background-color: red; margin: auto; position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); }
-        .meter-bar { width: 30px; height: 100%; background-color: green; position: absolute; left: 85px; }
-        .rod-icon { position: absolute; font-size: 30px; transition: left 0.2s linear; }
         .button { display: block; padding: 10px; background: white; border: 2px solid black; margin: 10px auto; cursor: pointer; width: 150px; }
         .clouds { position: absolute; top: 10%; left: 10%; font-size: 40px; }
+        #fishing-grid-container { display: none; position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); }
+        #fishing-grid { display: grid; grid-template-columns: repeat(3, 50px); grid-gap: 5px; justify-content: center; }
+        .grid-cell { width: 50px; height: 50px; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .shake { animation: shake 0.2s infinite alternate; }
+        @keyframes shake { from { transform: translateX(-3px); } to { transform: translateX(3px); } }
     </style>
 </head>
 <body>
@@ -37,6 +39,10 @@
             <div id="boat">🚤</div>
         </div>
     </div>
+    <div id="fishing-grid-container">
+        <p id="fishing-status">Find the fish!</p>
+        <div id="fishing-grid"></div>
+    </div>
     <div id="fish-tank">Fish Tank: <span id="caught-fish"></span></div>
     <button class="button" onclick="goToMarket()">Go to Market</button>
     <div id="market-screen">
@@ -47,11 +53,6 @@
         <button class="button" onclick="buyBoat(100000, '🚢')">Buy 🚢 (100,000)</button>
         <button class="button" onclick="startNewDay()">Start New Day</button>
     </div>
-    <div class="meter-container" id="meter-container">
-        <p id="fishing-status">Click the rod to catch the fish</p>
-        <div class="meter-bar" id="meter"></div>
-        <div class="rod-icon" id="rod">🎣</div>
-    </div>
     <script>
         let money = parseInt(localStorage.getItem("money")) || 0;
         let boat = localStorage.getItem("boat") || "🚤";
@@ -59,7 +60,39 @@
         document.getElementById("boat").innerText = boat;
         document.getElementById("money").innerText = money;
         let caughtFish = [];
-        let fishing = false;
+        function startFishingGame() {
+            document.getElementById("fishing-grid-container").style.display = "block";
+            let grid = document.getElementById("fishing-grid");
+            grid.innerHTML = "";
+            let fishPosition = Math.floor(Math.random() * 9);
+            for (let i = 0; i < 9; i++) {
+                let cell = document.createElement("div");
+                cell.classList.add("grid-cell");
+                cell.innerText = "🌊";
+                if (i === fishPosition) {
+                    setTimeout(() => {
+                        cell.classList.add("shake");
+                        setTimeout(() => {
+                            cell.innerText = fishTypes[boat][Math.floor(Math.random() * fishTypes[boat].length)];
+                            cell.onclick = () => catchFish(cell, true);
+                        }, Math.random() * 975 + 25);
+                    }, Math.random() * 975 + 25);
+                } else {
+                    cell.onclick = () => catchFish(cell, false);
+                }
+                grid.appendChild(cell);
+            }
+        }
+        function catchFish(cell, success) {
+            document.getElementById("fishing-grid-container").style.display = "none";
+            if (success) {
+                caughtFish.push(cell.innerText);
+                document.getElementById("caught-fish").innerText = caughtFish.join(" ");
+                document.getElementById("fishing-status").innerText = "Fish Caught! ✅";
+            } else {
+                document.getElementById("fishing-status").innerText = "Fish Got Away! 🛑";
+            }
+        }
         function updateDayBar() {
             let bar = document.getElementById("day-bar");
             let interval = setInterval(() => {
@@ -74,52 +107,8 @@
                 }
             }, 1200);
         }
-        function spawnFish() {
-            document.getElementById("water").innerHTML = '<div id="boat">' + boat + '</div>';
-            let water = document.getElementById("water");
-            for (let i = 0; i < 5; i++) {
-                let fish = document.createElement("div");
-                fish.classList.add("fish");
-                fish.innerText = fishTypes[boat][Math.floor(Math.random() * fishTypes[boat].length)];
-                fish.style.top = Math.random() * 40 + 10 + "%";
-                fish.style.left = Math.random() * 90 + "%";
-                fish.onclick = () => startFishing(fish);
-                water.appendChild(fish);
-            }
-        }
-        function startFishing(fish) {
-            if (fishing) return;
-            fishing = true;
-            document.getElementById("meter-container").style.display = "block";
-            let rod = document.getElementById("rod");
-            let movingRight = true;
-            let interval = setInterval(() => {
-                let pos = parseInt(rod.style.left || "0");
-                if (movingRight) {
-                    rod.style.left = pos + 20 + "px";
-                    if (pos >= 140) movingRight = false;
-                } else {
-                    rod.style.left = pos - 20 + "px";
-                    if (pos <= 0) movingRight = true;
-                }
-            }, 200);
-            setTimeout(() => {
-                clearInterval(interval);
-                let pos = parseInt(rod.style.left);
-                fishing = false;
-                document.getElementById("meter-container").style.display = "none";
-                if (pos > 85 && pos < 115) {
-                    document.getElementById("fishing-status").innerText = "Fish Caught ✅";
-                    caughtFish.push(fish.innerText);
-                    document.getElementById("caught-fish").innerText = caughtFish.join(" ");
-                } else {
-                    document.getElementById("fishing-status").innerText = "Lost Fish 🛑";
-                }
-                fish.remove();
-            }, 2000);
-        }
         updateDayBar();
-        spawnFish();
+        startFishingGame();
     </script>
 </body>
 </html>
