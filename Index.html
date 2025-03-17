@@ -6,47 +6,131 @@
     <title>Emoji Fishing Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { text-align: center; font-family: Arial, sans-serif; background-color: #87CEEB; }
-        #pond { display: grid; grid-template-columns: repeat(5, 60px); gap: 5px; justify-content: center; margin-top: 20px; }
-        .cell { width: 60px; height: 60px; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; background-color: #1E90FF; border-radius: 10px; }
-        .scoreboard { font-size: 20px; margin-top: 10px; }
-        .btn { font-size: 30px; cursor: pointer; margin-top: 20px; }
+        body { text-align: center; font-family: Arial, sans-serif; background-color: #87CEEB; overflow: hidden; }
+        #game-container { position: relative; width: 100vw; height: 80vh; }
+        #sky { background-color: #87CEEB; height: 50%; position: relative; }
+        #sun { position: absolute; top: 10px; left: 0; font-size: 40px; transition: left 45s linear; }
+        #water { background-color: #1E90FF; height: 50%; position: relative; }
+        #boat { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); font-size: 50px; }
+        .fish { position: absolute; font-size: 40px; cursor: pointer; animation: swim 5s infinite linear alternate; }
+        @keyframes swim { from { transform: translateX(-50px); } to { transform: translateX(50px); } }
+        #fish-tank { margin-top: 20px; font-size: 20px; }
+        #market-screen { display: none; }
+        .meter-container { display: none; width: 200px; height: 20px; background-color: red; margin: auto; position: relative; }
+        .meter-bar { width: 30px; height: 100%; background-color: green; position: absolute; left: 0; transition: left 1s linear; }
     </style>
 </head>
 <body>
     <h1 class="text-3xl font-bold">🎣 Emoji Fishing Game</h1>
-    <p>Click the fishing rod 🎣 to catch a fish!</p>
-    <div class="scoreboard">Score: <span id="score">0</span></div>
-    <div id="pond"></div>
-    <button class="btn" onclick="castRod()">🎣 Cast Fishing Rod</button>
-    
+    <div id="game-container">
+        <div id="sky">
+            <div id="sun">🌞</div>
+        </div>
+        <div id="water">
+            <div id="boat">🚤</div>
+        </div>
+    </div>
+    <div id="fish-tank">Fish Tank: <span id="caught-fish"></span></div>
+    <button onclick="goToMarket()">Go to Market</button>
+    <div id="market-screen">
+        <h2>Market</h2>
+        <div id="market-fish"></div>
+        <p>Money: $<span id="money">0</span></p>
+        <button onclick="buyBoat(1000, '⛵')">Buy ⛵ (1,000)</button>
+        <button onclick="buyBoat(100000, '🚢')">Buy 🚢 (100,000)</button>
+        <button onclick="startNewDay()">Start New Day</button>
+    </div>
+    <div class="meter-container" id="meter-container">
+        <div class="meter-bar" id="meter"></div>
+    </div>
     <script>
-        const pondSize = 5;
-        const fishEmojis = ['🐟', '🐠', '🐡', '🦈', '🐙', '🦀', '🦞', '🦐', '🐬', '🎣'];
-        let score = 0;
-        
-        function generatePond() {
-            const pond = document.getElementById("pond");
-            pond.innerHTML = "";
-            for (let i = 0; i < pondSize * pondSize; i++) {
-                let cell = document.createElement("div");
-                cell.classList.add("cell");
-                cell.innerHTML = "💦";
-                pond.appendChild(cell);
+        let money = parseInt(localStorage.getItem("money")) || 0;
+        let boat = localStorage.getItem("boat") || "🚤";
+        let fishTypes = { "🚤": ["🐟"], "⛵": ["🐟", "🐠"], "🚢": ["🐟", "🐠", "🦈"] };
+        document.getElementById("boat").innerText = boat;
+        document.getElementById("money").innerText = money;
+        let caughtFish = [];
+        let fishing = false;
+        function spawnFish() {
+            document.getElementById("water").innerHTML = '<div id="boat">' + boat + '</div>';
+            let water = document.getElementById("water");
+            for (let i = 0; i < 5; i++) {
+                let fish = document.createElement("div");
+                fish.classList.add("fish");
+                fish.innerText = fishTypes[boat][Math.floor(Math.random() * fishTypes[boat].length)];
+                fish.style.top = Math.random() * 40 + 10 + "%";
+                fish.style.left = Math.random() * 90 + "%";
+                fish.onclick = () => startFishing(fish);
+                water.appendChild(fish);
             }
         }
-        
-        function castRod() {
-            let cells = document.querySelectorAll(".cell");
-            let randomIndex = Math.floor(Math.random() * cells.length);
-            let caughtFish = fishEmojis[Math.floor(Math.random() * fishEmojis.length)];
-            cells[randomIndex].innerHTML = caughtFish;
-            score++;
-            document.getElementById("score").innerText = score;
-            setTimeout(generatePond, 1000);
+        function startFishing(fish) {
+            if (fishing) return;
+            fishing = true;
+            fish.style.animation = "shake 0.5s infinite";
+            document.getElementById("meter-container").style.display = "block";
+            let meter = document.getElementById("meter");
+            let interval = setInterval(() => {
+                let position = Math.random() * 170;
+                meter.style.left = position + "px";
+            }, 500);
+            setTimeout(() => {
+                clearInterval(interval);
+                let pos = parseInt(meter.style.left);
+                fishing = false;
+                document.getElementById("meter-container").style.display = "none";
+                if (pos > 70 && pos < 130) {
+                    caughtFish.push(fish.innerText);
+                    document.getElementById("caught-fish").innerText = caughtFish.join(" ");
+                }
+                fish.remove();
+            }, 2000);
         }
-        
-        generatePond();
+        function goToMarket() {
+            document.getElementById("game-container").style.display = "none";
+            document.getElementById("market-screen").style.display = "block";
+            let market = document.getElementById("market-fish");
+            market.innerHTML = "";
+            caughtFish.forEach(fish => {
+                let item = document.createElement("div");
+                item.innerText = fish + " - $100";
+                item.onclick = () => {
+                    money += 100;
+                    document.getElementById("money").innerText = money;
+                    item.remove();
+                    localStorage.setItem("money", money);
+                };
+                market.appendChild(item);
+            });
+        }
+        function buyBoat(cost, newBoat) {
+            if (money >= cost) {
+                money -= cost;
+                boat = newBoat;
+                localStorage.setItem("money", money);
+                localStorage.setItem("boat", boat);
+                document.getElementById("money").innerText = money;
+                document.getElementById("boat").innerText = boat;
+            }
+        }
+        function startNewDay() {
+            document.getElementById("market-screen").style.display = "none";
+            document.getElementById("game-container").style.display = "block";
+            caughtFish = [];
+            document.getElementById("caught-fish").innerText = "";
+            spawnFish();
+        }
+        function startDayNightCycle() {
+            let sun = document.getElementById("sun");
+            sun.style.left = "100%";
+            setTimeout(() => {
+                document.getElementById("sky").style.backgroundColor = "#2c3e50";
+                alert("Day Over");
+                goToMarket();
+            }, 45000);
+        }
+        spawnFish();
+        startDayNightCycle();
     </script>
 </body>
 </html>
