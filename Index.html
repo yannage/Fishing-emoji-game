@@ -47,14 +47,23 @@
         <button class="button" onclick="startNewDay()">Start New Day</button>
     </div>
     <script>
-        let money = parseInt(localStorage.getItem("money")) || 0;
-        let boat = localStorage.getItem("boat") || "🚤";
-        let fishTypes = {
-            "🚤": ["🐟", "🐠"],
-            "⛵": ["🐟", "🐠", "🐡", "🦐"],
-            "🚢": ["🐟", "🐠", "🐡", "🦐", "🦀", "🦞", "🦈"]
-        };
-        let fishValues = { "🐟": 5, "🐠": 10, "🐡": 20, "🦐": 50, "🦀": 100, "🦞": 200, "🦈": 500 };
+        if (typeof money === 'undefined') {
+            var money = parseInt(localStorage.getItem("money")) || 0;
+        }
+        if (typeof boat === 'undefined') {
+            var boat = localStorage.getItem("boat") || "🚤";
+        }
+        if (typeof fishTypes === 'undefined') {
+            var fishTypes = {
+                "🚤": ["🐟", "🐠"],
+                "⛵": ["🐟", "🐠", "🐡", "🦐"],
+                "🚢": ["🐟", "🐠", "🐡", "🦐", "🦀", "🦞", "🦈"]
+            };
+        }
+        if (typeof fishValues === 'undefined') {
+            var fishValues = { "🐟": 5, "🐠": 10, "🐡": 20, "🦐": 50, "🦀": 100, "🦞": 200, "🦈": 500 };
+        }
+        
         document.getElementById("boat").innerText = boat;
         document.getElementById("money").innerText = money;
         let caughtFish = [];
