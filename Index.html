@@ -36,13 +36,11 @@
         <div id="fishing-grid"></div>
     </div>
     <div id="fish-tank">Fish Tank: <span id="caught-fish"></span></div>
-    <button class="button" onclick="goToMarket()">Go to Market</button>
     <div id="market-screen">
         <h2>Market</h2>
         <div id="market-fish"></div>
         <p>Money: $<span id="money">0</span></p>
-        <button class="button" onclick="buyBoat(1000, '⛵')">Buy ⛵ (1,000)</button>
-        <button class="button" onclick="buyBoat(100000, '🚢')">Buy 🚢 (100,000)</button>
+        <button class="button" onclick="sellFish()">Sell Fish</button>
         <button class="button" onclick="startNewDay()">Start New Day</button>
     </div>
     <script>
@@ -105,12 +103,29 @@
             }
             fish.remove();
             if (fishRemaining === 0) {
-                goToMarket();
+                openMarket();
             }
         }
 
-        function goToMarket() {
+        function openMarket() {
+            document.getElementById("game-container").style.display = "none";
             document.getElementById("market-screen").style.display = "block";
+            document.getElementById("market-fish").innerText = "Fish to Sell: " + caughtFish.join(" ");
+        }
+
+        function sellFish() {
+            money += caughtFish.length * 10;
+            localStorage.setItem("money", money);
+            document.getElementById("money").innerText = money;
+            caughtFish = [];
+            document.getElementById("market-fish").innerText = "No fish left to sell!";
+        }
+
+        function startNewDay() {
+            document.getElementById("market-screen").style.display = "none";
+            document.getElementById("game-container").style.display = "block";
+            document.getElementById("caught-fish").innerText = "";
+            spawnFish();
         }
 
         spawnFish();
