@@ -44,14 +44,14 @@
         <div id="fishing-grid"></div>
     </div>
     <div id="fish-tank">Fish Tank: <span id="caught-fish"></span></div>
-    <button class="button" onclick="goToMarket()">Go to Market</button>
+    <button class="button" id="market-btn">Go to Market</button>
     <div id="market-screen">
         <h2>Market</h2>
         <div id="market-fish"></div>
         <p>Money: $<span id="money">0</span></p>
-        <button class="button" onclick="buyBoat(1000, '⛵')">Buy ⛵ (1,000)</button>
-        <button class="button" onclick="buyBoat(100000, '🚢')">Buy 🚢 (100,000)</button>
-        <button class="button" onclick="startNewDay()">Start New Day</button>
+        <button class="button" id="buy-boat-small">Buy ⛵ (1,000)</button>
+        <button class="button" id="buy-boat-large">Buy 🚢 (100,000)</button>
+        <button class="button" id="new-day-btn">Start New Day</button>
     </div>
     <script>
         let money = parseInt(localStorage.getItem("money")) || 0;
@@ -60,6 +60,11 @@
         document.getElementById("boat").innerText = boat;
         document.getElementById("money").innerText = money;
         let caughtFish = [];
+
+        document.getElementById("market-btn").addEventListener("click", goToMarket);
+        document.getElementById("buy-boat-small").addEventListener("click", () => buyBoat(1000, '⛵'));
+        document.getElementById("buy-boat-large").addEventListener("click", () => buyBoat(100000, '🚢'));
+        document.getElementById("new-day-btn").addEventListener("click", startNewDay);
 
         function updateDayBar() {
             let bar = document.getElementById("day-bar");
@@ -77,17 +82,37 @@
         }
 
         function spawnFish() {
-            document.getElementById("water").innerHTML = '<div id="boat">' + boat + '</div>';
             let water = document.getElementById("water");
+            water.innerHTML = '<div id="boat">' + boat + '</div>';
             for (let i = 0; i < 5; i++) {
                 let fish = document.createElement("div");
                 fish.classList.add("fish");
                 fish.innerText = fishTypes[boat][Math.floor(Math.random() * fishTypes[boat].length)];
                 fish.style.top = Math.random() * 40 + 10 + "%";
                 fish.style.left = Math.random() * 90 + "%";
-                fish.onclick = () => startFishingGame(fish);
+                fish.addEventListener("click", () => startFishingGame(fish));
                 water.appendChild(fish);
             }
+        }
+
+        function goToMarket() {
+            document.getElementById("market-screen").style.display = "block";
+        }
+
+        function buyBoat(cost, newBoat) {
+            if (money >= cost) {
+                money -= cost;
+                boat = newBoat;
+                localStorage.setItem("money", money);
+                localStorage.setItem("boat", boat);
+                document.getElementById("money").innerText = money;
+                document.getElementById("boat").innerText = boat;
+            }
+        }
+
+        function startNewDay() {
+            document.getElementById("market-screen").style.display = "none";
+            spawnFish();
         }
 
         updateDayBar();
