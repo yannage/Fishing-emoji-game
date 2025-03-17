@@ -63,7 +63,7 @@
                 fish.innerText = fishTypes[boat][Math.floor(Math.random() * fishTypes[boat].length)];
                 fish.style.top = Math.random() * 40 + 10 + "%";
                 fish.style.left = Math.random() * 90 + "%";
-                fish.setAttribute("onclick", "startFishingGame(this)");
+                fish.onclick = function() { startFishingGame(fish); };
                 water.appendChild(fish);
             }
         }
@@ -77,13 +77,14 @@
                 let cell = document.createElement("div");
                 cell.classList.add("grid-cell");
                 cell.innerText = "🌊";
-                cell.setAttribute("onclick", "catchFish(this, false, fish)");
+                cell.onclick = function() { catchFish(false, fish); };
                 if (i === fishPosition) {
                     setTimeout(() => {
                         cell.innerText = "💦";
+                        cell.onclick = function() { catchFish(false, fish); };
                         setTimeout(() => {
                             cell.innerText = fish.innerText;
-                            cell.setAttribute("onclick", "catchFish(this, true, fish)");
+                            cell.onclick = function() { catchFish(true, fish); };
                         }, 500);
                     }, 500);
                 }
@@ -91,7 +92,7 @@
             }
         }
 
-        function catchFish(cell, success, fish) {
+        function catchFish(success, fish) {
             document.getElementById("fishing-grid-container").style.display = "none";
             if (success) {
                 caughtFish.push(fish.innerText);
