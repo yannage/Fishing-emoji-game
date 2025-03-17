@@ -67,7 +67,7 @@
 
         function spawnFish() {
             let water = document.getElementById("water");
-            water.innerHTML = '<div id="boat">' + boat + '</div>';
+            water.innerHTML = '<div id="boat">' + boat + '</div><div id="fishing-rod">🎣</div>';
             fishRemaining = Math.floor(Math.random() * 5) + 3; // Random number of fish between 3 and 7
             
             for (let i = 0; i < fishRemaining; i++) {
@@ -178,9 +178,27 @@
             document.getElementById("fishing-grid-container").style.display = "none";
             fishRemaining--;
             
+            const fishingRod = document.getElementById("fishing-rod");
+            
             if (success) {
                 caughtFish.push(fish.innerText);
                 document.getElementById("caught-fish").innerText = caughtFish.join(" ");
+                
+                // Create a splash effect
+                const splash = document.createElement("div");
+                splash.style.position = "absolute";
+                splash.style.fontSize = "30px";
+                splash.innerText = "💦";
+                splash.style.left = fish.style.left;
+                splash.style.top = fish.style.top;
+                splash.style.zIndex = "4";
+                document.getElementById("water").appendChild(splash);
+                
+                // Remove splash after animation
+                setTimeout(() => {
+                    splash.remove();
+                }, 800);
+                
                 // Play a subtle catch sound
                 try {
                     const sound = document.getElementById("market-sound");
@@ -192,6 +210,12 @@
                     }, 500); // Even shorter for the catch sound
                 } catch (e) {}
             }
+            
+            // Hide fishing rod with delay
+            setTimeout(() => {
+                fishingRod.style.display = "none";
+                fishingRod.style.transform = "rotate(0deg)";
+            }, 500);
             
             fish.remove();
             currentFishingTarget = null;
