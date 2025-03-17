@@ -12,7 +12,7 @@
         .cloud { font-size: 40px; }
         #water { background-color: #1E90FF; height: 55%; position: relative; display: flex; align-items: center; }
         #boat { position: absolute; top: 0; left: 5%; font-size: 50px; }
-        .fish { position: absolute; font-size: 40px; cursor: pointer; }
+        .fish { position: absolute; font-size: 40px; cursor: pointer; transition: transform 0.2s linear; }
         #fish-tank { margin-top: 10px; font-size: 20px; position: relative; z-index: 2; }
         #market-screen { display: none; }
         .button { display: block; padding: 10px; background: white; border: 2px solid black; margin: 10px auto; cursor: pointer; width: 150px; }
@@ -46,6 +46,7 @@
         <button class="button" onclick="sellFish()">Sell Fish</button>
         <button class="button" onclick="startNewDay()">Start New Day</button>
     </div>
+    <audio id="market-sound" src="https://www.fesliyanstudios.com/play-mp3/4383"></audio>
     <script>
         let money = parseInt(localStorage.getItem("money")) || 0;
         let boat = localStorage.getItem("boat") || "🚤";
@@ -55,17 +56,16 @@
             "🚢": ["🐟", "🐠", "🐡", "🦐", "🦀", "🦞", "🦈"]
         };
         let fishValues = { "🐟": 5, "🐠": 10, "🐡": 20, "🦐": 50, "🦀": 100, "🦞": 200, "🦈": 500 };
-
         document.getElementById("boat").innerText = boat;
         document.getElementById("money").innerText = money;
         let caughtFish = [];
-        let fishRemaining = 5;
+        let fishRemaining = 0;
 
         function spawnFish() {
             let water = document.getElementById("water");
             water.innerHTML = '<div id="boat">' + boat + '</div>';
-            fishRemaining = 5;
-
+            fishRemaining = Math.floor(Math.random() * 5) + 3; // Random number of fish between 3 and 7
+            
             for (let i = 0; i < fishRemaining; i++) {
                 let fish = document.createElement("div");
                 fish.classList.add("fish");
@@ -78,8 +78,8 @@
                     let left = parseFloat(fish.style.left);
                     if (left <= 0) fish.direction = 1;
                     if (left >= 90) fish.direction = -1;
-                    fish.style.left = left + fish.direction * 1 + "%";
-                }, 100);
+                    fish.style.left = left + fish.direction * 0.5 + "%";
+                }, 50);
 
                 fish.onclick = function () {
                     clearInterval(fish.moveInterval);
@@ -91,43 +91,12 @@
 
         function weightedRandomFish() {
             let availableFish = fishTypes[boat];
-            let weightedFish = [];
-            availableFish.forEach(fish => {
-                let weight = 10 - Math.log2(fishValues[fish]); 
-                for (let i = 0; i < weight; i++) {
-                    weightedFish.push(fish);
-                }
-            });
-            return weightedFish[Math.floor(Math.random() * weightedFish.length)];
+            return availableFish[Math.floor(Math.random() * availableFish.length)];
         }
 
         function startFishingGame(fish) {
             document.getElementById("fishing-grid-container").style.display = "block";
-            let grid = document.getElementById("fishing-grid");
-            grid.innerHTML = "";
-            let fishPosition = Math.floor(Math.random() * 9);
-            for (let i = 0; i < 9; i++) {
-                let cell = document.createElement("div");
-                cell.classList.add("grid-cell");
-                cell.innerText = "🌊";
-                cell.onclick = function () { catchFish(false, fish); };
-                if (i === fishPosition) {
-                    setTimeout(() => {
-                        cell.innerText = "💦";
-                        cell.onclick = function () { catchFish(false, fish); };
-                        setTimeout(() => {
-                            cell.innerText = fish.innerText;
-                            cell.onclick = function () { catchFish(true, fish); };
-                            setTimeout(() => {
-                                if (cell.innerText === fish.innerText) {
-                                    catchFish(false, fish);
-                                }
-                            }, 1000);
-                        }, 500);
-                    }, 500);
-                }
-                grid.appendChild(cell);
-            }
+            setTimeout(() => { catchFish(false, fish); }, 1000); // Auto escape after 1 second if not clicked
         }
 
         function catchFish(success, fish) {
@@ -136,9 +105,6 @@
             if (success) {
                 caughtFish.push(fish.innerText);
                 document.getElementById("caught-fish").innerText = caughtFish.join(" ");
-                document.getElementById("fishing-status").innerText = "Fish Caught! ✅";
-            } else {
-                document.getElementById("fishing-status").innerText = "Fish Got Away! 🛑";
             }
             fish.remove();
             if (fishRemaining === 0) {
@@ -150,6 +116,7 @@
             document.getElementById("game-container").style.display = "none";
             document.getElementById("market-screen").style.display = "block";
             document.getElementById("market-fish").innerText = "Fish to Sell: " + caughtFish.join(" ");
+            document.getElementById("market-sound").play();
         }
 
         function sellFish() {
@@ -157,13 +124,11 @@
             localStorage.setItem("money", money);
             document.getElementById("money").innerText = money;
             caughtFish = [];
-            document.getElementById("market-fish").innerText = "No fish left to sell!";
         }
 
         function startNewDay() {
             document.getElementById("market-screen").style.display = "none";
             document.getElementById("game-container").style.display = "block";
-            document.getElementById("caught-fish").innerText = "";
             spawnFish();
         }
 
