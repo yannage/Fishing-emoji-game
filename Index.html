@@ -52,11 +52,13 @@
         document.getElementById("boat").innerText = boat;
         document.getElementById("money").innerText = money;
         let caughtFish = [];
+        let fishRemaining = 5;
 
         function spawnFish() {
             let water = document.getElementById("water");
             water.innerHTML = '<div id="boat">' + boat + '</div>';
-            for (let i = 0; i < 5; i++) {
+            fishRemaining = 5;
+            for (let i = 0; i < fishRemaining; i++) {
                 let fish = document.createElement("div");
                 fish.classList.add("fish");
                 fish.innerText = fishTypes[boat][Math.floor(Math.random() * fishTypes[boat].length)];
@@ -93,6 +95,7 @@
 
         function catchFish(success, fish) {
             document.getElementById("fishing-grid-container").style.display = "none";
+            fishRemaining--;
             if (success) {
                 caughtFish.push(fish.innerText);
                 document.getElementById("caught-fish").innerText = caughtFish.join(" ");
@@ -101,6 +104,13 @@
                 document.getElementById("fishing-status").innerText = "Fish Got Away! 🛑";
             }
             fish.remove();
+            if (fishRemaining === 0) {
+                goToMarket();
+            }
+        }
+
+        function goToMarket() {
+            document.getElementById("market-screen").style.display = "block";
         }
 
         spawnFish();
