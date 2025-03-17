@@ -9,104 +9,388 @@
         body { text-align: center; font-family: Arial, sans-serif; background-color: #87CEEB; overflow: hidden; }
         #game-container { position: relative; width: 100vw; height: 75vh; }
         #sky { background-color: #87CEEB; height: 45%; position: relative; display: flex; justify-content: space-around; align-items: center; padding: 10px; }
-        .cloud { font-size: 40px; }
-        #water { background-color: #1E90FF; height: 55%; position: relative; display: flex; align-items: center; }
-        #boat { position: absolute; top: 0; left: 5%; font-size: 50px; }
+        .cloud { font-size: 40px; animation: float 30s infinite linear; }
+        @keyframes float {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+            100% { transform: translateX(0); }
+        }
+        #water { 
+            background: linear-gradient(to bottom, #1E90FF, #00008B); 
+            height: 55%; 
+            position: relative; 
+            display: flex; 
+            align-items: center;
+            overflow: hidden;
+        }
+        .water-ripple {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="20" viewBox="0 0 100 20"><path fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" d="M0,10 Q25,20 50,10 T100,10" /></svg>');
+            background-repeat: repeat-x;
+            animation: ripple 10s infinite linear;
+            opacity: 0.5;
+        }
+        @keyframes ripple {
+            from { background-position-x: 0; }
+            to { background-position-x: 100px; }
+        }
+        #boat { position: absolute; top: 0; left: 5%; font-size: 50px; transition: left 0.5s ease; }
         #fishing-rod { display: none; position: absolute; font-size: 40px; z-index: 5; transform-origin: top left; transition: transform 0.5s ease-out; }
         .fish { position: absolute; font-size: 40px; cursor: pointer; transition: transform 0.2s linear; }
         #fish-tank { margin-top: 10px; font-size: 20px; position: relative; z-index: 2; }
+        #stats { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            background-color: rgba(255, 255, 255, 0.8); 
+            padding: 10px; 
+            border-radius: 10px;
+            text-align: left;
+            z-index: 5;
+        }
         #market-screen { display: none; }
-        .button { display: block; padding: 10px; background: white; border: 2px solid black; margin: 10px auto; cursor: pointer; width: 150px; }
-        #fishing-grid-container { display: none; position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 10px; z-index: 10; }
-        #fishing-grid { display: grid; grid-template-columns: repeat(3, 50px); grid-gap: 5px; justify-content: center; }
-        .grid-cell { width: 50px; height: 50px; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; background-color: #f0f0f0; border-radius: 5px; }
+        .button { 
+            display: block; 
+            padding: 10px; 
+            background: white; 
+            border: 2px solid black; 
+            margin: 10px auto; 
+            cursor: pointer; 
+            width: 150px; 
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+        .button:hover {
+            background-color: #f0f0f0;
+            transform: scale(1.05);
+        }
+        #fishing-grid-container { 
+            display: none; 
+            position: absolute; 
+            top: 40%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            background-color: rgba(255, 255, 255, 0.9); 
+            padding: 20px; 
+            border-radius: 10px; 
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        #fishing-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 60px); 
+            grid-gap: 8px; 
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .grid-cell { 
+            width: 60px; 
+            height: 60px; 
+            font-size: 30px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            background-color: #f0f0f0; 
+            border-radius: 5px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .grid-cell:hover {
+            background-color: #e0e0e0;
+            transform: scale(1.05);
+        }
+        #time-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #ccc;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        #time-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 100%;
+            transition: width linear;
+        }
+        .splash-effect {
+            position: absolute;
+            font-size: 20px;
+            animation: splash 0.8s forwards;
+            z-index: 2;
+        }
+        @keyframes splash {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .upgrade-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .fish-counter {
+            margin-right: 10px;
+        }
+        #fishing-status {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .fish-bubble {
+            position: absolute;
+            font-size: 15px;
+            animation: bubble 3s infinite;
+            opacity: 0.7;
+        }
+        @keyframes bubble {
+            0% { transform: translateY(0); opacity: 0.7; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
     </style>
 </head>
 <body>
-    <h1 class="text-3xl font-bold">🎣 Emoji Fishing Game</h1>
+    <h1 class="text-3xl font-bold mt-2">🎣 Emoji Fishing Game</h1>
     <div id="game-container">
         <div id="sky">
-            <div class="cloud">☁️</div>
-            <div class="cloud">☁️</div>
-            <div class="cloud">☁️</div>
-            <div class="cloud">☁️</div>
+            <div class="cloud" style="animation-duration: 45s;">☁️</div>
+            <div class="cloud" style="animation-duration: 60s; animation-delay: -10s;">☁️</div>
+            <div class="cloud" style="animation-duration: 50s; animation-delay: -25s;">☁️</div>
+            <div class="cloud" style="animation-duration: 55s; animation-delay: -5s;">☁️</div>
         </div>
         <div id="water">
+            <div class="water-ripple"></div>
             <div id="boat">🚤</div>
             <div id="fishing-rod">🎣</div>
+        </div>
+        <div id="stats">
+            <p>Money: $<span id="money">0</span></p>
+            <p>Boat: <span id="boat-type">Standard</span></p>
+            <p>Day: <span id="day-counter">1</span></p>
         </div>
     </div>
     <div id="fishing-grid-container">
         <p id="fishing-status">Find the fish!</p>
         <div id="fishing-grid"></div>
+        <div id="time-bar">
+            <div id="time-fill"></div>
+        </div>
     </div>
     <div id="fish-tank">Fish Tank: <span id="caught-fish"></span></div>
     <div id="market-screen">
-        <h2>Market</h2>
-        <div id="market-fish"></div>
-        <p>Money: $<span id="money">0</span></p>
+        <h2 class="text-2xl font-bold mb-4">Fish Market</h2>
+        <div id="market-fish" class="text-xl mb-4"></div>
+        <div class="text-lg mb-4">Total Value: $<span id="catch-value">0</span></div>
+        <p class="text-xl">Money: $<span id="market-money">0</span></p>
         <button class="button" onclick="sellFish()">Sell Fish</button>
+        <div id="upgrades" class="mt-6 mb-4">
+            <h3 class="text-xl font-bold">Upgrades</h3>
+            <div class="upgrade-option">
+                <span>Better Boat (⛵): $500</span>
+                <button class="button" style="margin: 0; width: auto;" onclick="tryUpgrade('boat')">Buy</button>
+            </div>
+            <div class="upgrade-option">
+                <span>Luxury Boat (🚢): $2000</span>
+                <button class="button" style="margin: 0; width: auto;" onclick="tryUpgrade('luxury')">Buy</button>
+            </div>
+            <div class="upgrade-option">
+                <span>Better Rod (+10% catch): $300</span>
+                <button class="button" style="margin: 0; width: auto;" onclick="tryUpgrade('rod')">Buy</button>
+            </div>
+        </div>
         <button class="button" onclick="startNewDay()">Start New Day</button>
     </div>
+    <audio id="splash-sound" src="https://cdn.pixabay.com/download/audio/2021/08/09/audio_0625c6dd22.mp3?filename=bubble-sound-43191.mp3"></audio>
     <audio id="market-sound" src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d1718d0c4f.mp3?filename=soft-notification-sound-98485.mp3"></audio>
+    <audio id="catch-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_12b0c7443c.mp3?filename=success-1-6297.mp3"></audio>
+    <audio id="miss-sound" src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_db3d731549.mp3?filename=negative_beeps-6008.mp3"></audio>
     <script>
+        // Game state
         let money = parseInt(localStorage.getItem("money")) || 0;
         let boat = localStorage.getItem("boat") || "🚤";
+        let day = parseInt(localStorage.getItem("day")) || 1;
+        let rodLevel = parseInt(localStorage.getItem("rodLevel")) || 0;
+        
         let fishTypes = {
             "🚤": ["🐟", "🐠"],
             "⛵": ["🐟", "🐠", "🐡", "🦐"],
             "🚢": ["🐟", "🐠", "🐡", "🦐", "🦀", "🦞", "🦈"]
         };
-        let fishValues = { "🐟": 5, "🐠": 10, "🐡": 20, "🦐": 50, "🦀": 100, "🦞": 200, "🦈": 500 };
-        document.getElementById("boat").innerText = boat;
-        document.getElementById("money").innerText = money;
+        
+        let fishRarity = {
+            "🐟": 60, // Common
+            "🐠": 40, // Uncommon
+            "🐡": 25, // Rare
+            "🦐": 15, // Very Rare
+            "🦀": 8,  // Epic
+            "🦞": 4,  // Legendary
+            "🦈": 2   // Mythic
+        };
+        
+        let fishValues = { 
+            "🐟": 5, 
+            "🐠": 10, 
+            "🐡": 20, 
+            "🦐": 50, 
+            "🦀": 100, 
+            "🦞": 200, 
+            "🦈": 500 
+        };
+        
+        let boatNames = {
+            "🚤": "Standard",
+            "⛵": "Better",
+            "🚢": "Luxury"
+        };
+        
+        // Game variables
         let caughtFish = [];
         let fishRemaining = 0;
         let currentFishingTarget = null;
         let fishingTimeout = null;
-
+        let fishGridPosition = -1;
+        let fishMovementInterval = null;
+        let fishBubbleInterval = null;
+        
+        // Initialize game
+        document.getElementById("boat").innerText = boat;
+        document.getElementById("money").innerText = money;
+        document.getElementById("market-money").innerText = money;
+        document.getElementById("day-counter").innerText = day;
+        document.getElementById("boat-type").innerText = boatNames[boat];
+        
+        // Spawn fish in the water
         function spawnFish() {
             let water = document.getElementById("water");
-            water.innerHTML = '<div id="boat">' + boat + '</div><div id="fishing-rod">🎣</div>';
-            fishRemaining = Math.floor(Math.random() * 5) + 3; // Random number of fish between 3 and 7
+            water.innerHTML = '<div class="water-ripple"></div><div id="boat">' + boat + '</div><div id="fishing-rod">🎣</div>';
+            
+            // Determine number of fish based on day (more fish as days progress)
+            fishRemaining = Math.floor(Math.random() * 3) + 3 + Math.min(5, Math.floor(day/3));
             
             for (let i = 0; i < fishRemaining; i++) {
                 let fish = document.createElement("div");
                 fish.classList.add("fish");
                 fish.innerText = weightedRandomFish();
                 fish.style.top = Math.random() * 40 + 10 + "%";
-                fish.style.left = Math.random() * 90 + "%";
+                fish.style.left = Math.random() * 80 + 10 + "%";
                 fish.direction = Math.random() < 0.5 ? 1 : -1;
+                fish.speed = 0.3 + Math.random() * 0.4; // Random speed for each fish
+                
+                // Create occasional bubbles
+                createBubbles(fish);
 
+                // Move fish randomly
                 fish.moveInterval = setInterval(() => {
                     let left = parseFloat(fish.style.left);
-                    if (left <= 0) fish.direction = 1;
+                    if (left <= 5) fish.direction = 1;
                     if (left >= 90) fish.direction = -1;
-                    fish.style.left = left + fish.direction * 0.5 + "%";
+                    
+                    // Randomly change direction occasionally
+                    if (Math.random() < 0.02) {
+                        fish.direction *= -1;
+                    }
+                    
+                    fish.style.left = left + fish.direction * fish.speed + "%";
+                    
+                    // Occasionally move up or down a bit
+                    if (Math.random() < 0.05) {
+                        let top = parseFloat(fish.style.top);
+                        let newTop = top + (Math.random() * 2 - 1);
+                        // Keep fish within water bounds
+                        if (newTop > 10 && newTop < 50) {
+                            fish.style.top = newTop + "%";
+                        }
+                    }
+                    
+                    // Flip fish based on direction
+                    if (fish.direction > 0) {
+                        fish.style.transform = "scaleX(1)";
+                    } else {
+                        fish.style.transform = "scaleX(-1)";
+                    }
                 }, 50);
 
                 fish.onclick = function () {
                     clearInterval(fish.moveInterval);
                     startFishingGame(fish);
                 };
+                
                 water.appendChild(fish);
             }
         }
 
-        function weightedRandomFish() {
-            let availableFish = fishTypes[boat];
-            return availableFish[Math.floor(Math.random() * availableFish.length)];
+        // Create bubble animation for fish
+        function createBubbles(fish) {
+            const createBubble = () => {
+                if (!fish.isConnected) return; // Stop if fish is no longer in the DOM
+                
+                if (Math.random() < 0.3) { // 30% chance to create a bubble
+                    const bubble = document.createElement("div");
+                    bubble.innerText = "🫧";
+                    bubble.classList.add("fish-bubble");
+                    
+                    const fishRect = fish.getBoundingClientRect();
+                    const waterRect = document.getElementById("water").getBoundingClientRect();
+                    
+                    bubble.style.left = (fishRect.left - waterRect.left + fishRect.width / 2) + "px";
+                    bubble.style.top = (fishRect.top - waterRect.top) + "px";
+                    
+                    document.getElementById("water").appendChild(bubble);
+                    
+                    // Remove bubble after animation completes
+                    setTimeout(() => {
+                        if (bubble.isConnected) {
+                            bubble.remove();
+                        }
+                    }, 3000);
+                }
+            };
+            
+            // Create bubbles occasionally
+            fish.bubbleInterval = setInterval(createBubble, 2000);
         }
 
+        // Select fish based on rarity
+        function weightedRandomFish() {
+            let availableFish = fishTypes[boat];
+            let totalWeight = 0;
+            
+            // Calculate total weight
+            for (let fish of availableFish) {
+                totalWeight += fishRarity[fish];
+            }
+            
+            // Make selection based on weight
+            let random = Math.random() * totalWeight;
+            let cumulativeWeight = 0;
+            
+            for (let fish of availableFish) {
+                cumulativeWeight += fishRarity[fish];
+                if (random <= cumulativeWeight) {
+                    return fish;
+                }
+            }
+            
+            // Fallback
+            return availableFish[0];
+        }
+
+        // Start the fishing mini-game
         function startFishingGame(fish) {
             const gridContainer = document.getElementById("fishing-grid-container");
             const grid = document.getElementById("fishing-grid");
+            const timeFill = document.getElementById("time-fill");
             
             // Clear previous grid
             grid.innerHTML = "";
             
-            // Create a 3x3 grid
-            const fishPosition = Math.floor(Math.random() * 9);
+            // Initially place fish in a random position
+            fishGridPosition = Math.floor(Math.random() * 9);
             
             // Show fishing rod animation
             const fishingRod = document.getElementById("fishing-rod");
@@ -126,15 +410,27 @@
             // Animate fishing rod to point at the fish
             fishingRod.style.transform = `rotate(${angle}deg)`;
             
+            // Create the 3x3 grid
             for (let i = 0; i < 9; i++) {
                 const cell = document.createElement("div");
                 cell.classList.add("grid-cell");
                 cell.dataset.index = i;
                 
                 cell.onclick = function() {
-                    if (parseInt(this.dataset.index) === fishPosition) {
-                        this.innerText = fish.innerText;
+                    const index = parseInt(this.dataset.index);
+                    
+                    if (index === fishGridPosition) {
+                        // Success!
+                        const gridCells = document.querySelectorAll('.grid-cell');
+                        gridCells[fishGridPosition].innerText = fish.innerText;
+                        
+                        // Clear timeouts and intervals
                         clearTimeout(fishingTimeout);
+                        clearInterval(fishMovementInterval);
+                        document.getElementById("time-fill").style.transition = "none";
+                        
+                        // Play catch sound
+                        playSound("catch-sound");
                         
                         // Show catching animation
                         fishingRod.style.transform = `rotate(${angle}deg) scale(1.2)`;
@@ -143,141 +439,53 @@
                             setTimeout(() => catchFish(true, fish), 300);
                         }, 200);
                     } else {
+                        // Miss!
                         this.innerText = "💨";
                         this.style.pointerEvents = "none";
+                        playSound("miss-sound", 0.2);
                     }
                 };
                 
                 grid.appendChild(cell);
             }
             
+            // Show water splash hint after 0.5 seconds
+            setTimeout(() => {
+                updateFishHint();
+            }, 500);
+            
+            // Move fish every second
+            fishMovementInterval = setInterval(() => {
+                // Get all empty cells (not clicked yet)
+                const emptyCells = Array.from(document.querySelectorAll('.grid-cell')).filter(
+                    cell => !cell.innerText && cell.style.pointerEvents !== "none"
+                );
+                
+                // If there are empty cells, move the fish
+                if (emptyCells.length > 0) {
+                    // Remove previous hint
+                    const cells = document.querySelectorAll('.grid-cell');
+                    cells.forEach(cell => {
+                        if (cell.innerText === "💦") {
+                            cell.innerText = "";
+                        }
+                    });
+                    
+                    // Choose a random empty cell
+                    const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                    fishGridPosition = parseInt(randomCell.dataset.index);
+                    
+                    // Update hint
+                    updateFishHint();
+                }
+            }, 1000);
+            
             currentFishingTarget = fish;
             gridContainer.style.display = "block";
             
-            // Auto escape after 3 seconds if not caught
-            fishingTimeout = setTimeout(() => {
-                catchFish(false, fish);
-            }, 3000);
+            // Add a small chance to have an easier catch based on rod level (5% per level)
+            const catchBonus = rodLevel * 0.05;
+            const catchTime = Math.random() < catchBonus ? 5000 : 4000;
             
-            // Add visual countdown to show time remaining
-            const statusElement = document.getElementById("fishing-status");
-            let timeLeft = 3;
-            statusElement.innerText = `Find the fish! ${timeLeft}s remaining`;
-            
-            const countdownInterval = setInterval(() => {
-                timeLeft--;
-                if (timeLeft > 0) {
-                    statusElement.innerText = `Find the fish! ${timeLeft}s remaining`;
-                } else {
-                    clearInterval(countdownInterval);
-                }
-            }, 1000);
-        }
-
-        function catchFish(success, fish) {
-            document.getElementById("fishing-grid-container").style.display = "none";
-            fishRemaining--;
-            
-            const fishingRod = document.getElementById("fishing-rod");
-            
-            if (success) {
-                caughtFish.push(fish.innerText);
-                document.getElementById("caught-fish").innerText = caughtFish.join(" ");
-                
-                // Create a splash effect
-                const splash = document.createElement("div");
-                splash.style.position = "absolute";
-                splash.style.fontSize = "30px";
-                splash.innerText = "💦";
-                splash.style.left = fish.style.left;
-                splash.style.top = fish.style.top;
-                splash.style.zIndex = "4";
-                document.getElementById("water").appendChild(splash);
-                
-                // Remove splash after animation
-                setTimeout(() => {
-                    splash.remove();
-                }, 800);
-                
-                // Play a subtle catch sound
-                try {
-                    const sound = document.getElementById("market-sound");
-                    sound.volume = 0.2;
-                    sound.play();
-                    setTimeout(() => {
-                        sound.pause();
-                        sound.currentTime = 0;
-                    }, 500); // Even shorter for the catch sound
-                } catch (e) {}
-            }
-            
-            // Hide fishing rod with delay
-            setTimeout(() => {
-                fishingRod.style.display = "none";
-                fishingRod.style.transform = "rotate(0deg)";
-            }, 500);
-            
-            fish.remove();
-            currentFishingTarget = null;
-            
-            if (fishRemaining === 0) {
-                openMarket();
-            }
-        }
-
-        function openMarket() {
-            document.getElementById("game-container").style.display = "none";
-            document.getElementById("market-screen").style.display = "block";
-            document.getElementById("market-fish").innerText = "Fish to Sell: " + caughtFish.join(" ");
-            try {
-                const sound = document.getElementById("market-sound");
-                sound.volume = 0.3; // Lower volume
-                sound.play();
-                // Stop sound after 1 second
-                setTimeout(() => {
-                    sound.pause();
-                    sound.currentTime = 0;
-                }, 1000);
-            } catch (e) {
-                console.log("Audio couldn't play automatically: ", e);
-            }
-        }
-
-        function sellFish() {
-            money += caughtFish.reduce((sum, fish) => sum + fishValues[fish], 0);
-            localStorage.setItem("money", money);
-            document.getElementById("money").innerText = money;
-            caughtFish = [];
-            document.getElementById("caught-fish").innerText = "";
-            document.getElementById("market-fish").innerText = "Fish to Sell: ";
-        }
-
-        function startNewDay() {
-            document.getElementById("market-screen").style.display = "none";
-            document.getElementById("game-container").style.display = "block";
-            spawnFish();
-        }
-
-        // Check if there's enough money to upgrade the boat
-        function upgradeBoat() {
-            if (boat === "🚤" && money >= 500) {
-                boat = "⛵";
-                money -= 500;
-            } else if (boat === "⛵" && money >= 2000) {
-                boat = "🚢";
-                money -= 2000;
-            } else {
-                return false;
-            }
-            
-            localStorage.setItem("boat", boat);
-            localStorage.setItem("money", money);
-            document.getElementById("boat").innerText = boat;
-            document.getElementById("money").innerText = money;
-            return true;
-        }
-
-        spawnFish();
-    </script>
-</body>
-</html>
+            // Set timer bar animation
+            timeFill.style.transition = `width ${catchTime/1
